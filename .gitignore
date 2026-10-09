@@ -1,0 +1,5 @@
+# Gros fichiers de données
+*.parquet
+
+# Notebook volumineux
+W1_Porto_Exploration*.ipynb

@@ -1,0 +1,355 @@
+Tu es un expert en Deep Learning, Computer Vision et création de présentations PowerPoint professionnelles haut niveau.
+
+Ta mission est de générer une présentation PowerPoint complète, moderne et professionnelle (10 à 15 minutes) sur mon projet de détection d’anomalies industrielles par Deep Learning.
+
+━━━━━━━━━━━━━━━━━━━
+🎨 STYLE VISUEL À RESPECTER
+━━━━━━━━━━━━━━━━━━━
+
+- Style premium type conférence IA / soutenance Master / conférence scientifique
+- Palette de couleurs :
+  • Beige
+  • Marron
+  • Blanc cassé
+  • Noir léger
+- Slides modernes et aérées
+- Très peu de texte
+- Utiliser principalement :
+  • schémas
+  • pipelines
+  • diagrammes
+  • illustrations IA
+  • tableaux élégants
+  • heatmaps
+  • visualisations
+  • graphiques
+- Ajouter des animations et transitions légères
+- Éviter les slides surchargées
+- Utiliser des icônes modernes et illustrations industrielles
+- Design cohérent sur toutes les slides
+
+━━━━━━━━━━━━━━━━━━━
+📌 MESSAGE À INSÉRER AU DÉBUT
+━━━━━━━━━━━━━━━━━━━
+
+Créer une slide “Structure demandée de la présentation”.
+
+Le contenu doit être présenté de manière élégante avec timeline horizontale et icônes modernes :
+
+“Bonsoir à tous,
+J’espère que vous allez bien.
+
+Je reviens sur la structure de la présentation :
+
+1. Introduction :
+présentez la problématique, l’importance du sujet et la nécessité d’opter pour une solution.
+
+2. Solution proposée :
+présentez votre solution de manière générale.
+
+3. Dataset :
+décrivez la structure de votre base de données.
+
+4. Architecture :
+exposez l’architecture adoptée et justifiez le choix du modèle.
+
+5. Évaluation :
+présentez l’évaluation de la performance en justifiant le choix des métriques utilisées.
+
+6. Démonstration :
+terminez par une courte démonstration.
+
+La durée totale de la présentation est de 10 à 15 minutes, questions comprises.”
+
+━━━━━━━━━━━━━━━━━━━
+📌 CONTEXTE DU PROJET
+━━━━━━━━━━━━━━━━━━━
+
+Projet :
+Détection d’anomalies industrielles pour l’inspection automatique de tapis industriels.
+
+Objectif :
+Détecter automatiquement plusieurs types de défauts industriels :
+- cut
+- hole
+- color
+- metal_contamination
+- thread
+
+Dataset utilisé :
+MVTec AD
+
+Caractéristiques :
+- 15 catégories industrielles
+- images PNG haute résolution
+- 1024×1024
+- importées depuis Kaggle
+
+Environnement :
+- Google Colab GPU T4
+- TensorFlow/Keras
+- PyTorch
+- ResNet50
+- Grad-CAM
+
+━━━━━━━━━━━━━━━━━━━
+📌 PREMIÈRE APPROCHE TESTÉE
+━━━━━━━━━━━━━━━━━━━
+
+J’ai d’abord testé PatchCore (méthode Memory Bank populaire).
+
+Présenter clairement :
+- fonctionnement général
+- extraction des patches
+- mémoire bancaire
+- localisation des anomalies
+
+Ajouter :
+- schéma PatchCore
+- heatmaps
+- outputs visuels
+
+━━━━━━━━━━━━━━━━━━━
+❌ LIMITES RENCONTRÉES AVEC PATCHCORE
+━━━━━━━━━━━━━━━━━━━
+
+Créer plusieurs slides modernes expliquant les limites.
+
+Problèmes rencontrés :
+- stockage énorme des patches
+- consommation mémoire très élevée
+- méthode trop lourde
+- temps d’inférence important
+- mauvaise adaptation à mon dataset
+- localisation parfois imprécise
+
+Afficher :
+- graphiques RAM
+- tableau comparatif
+- exemples de mauvaises détections
+- courbes performances
+
+Ajouter une conclusion visuelle :
+“PatchCore was not suitable for our industrial constraints”
+
+━━━━━━━━━━━━━━━━━━━
+📌 PREMIER MODÈLE CNN TESTÉ
+━━━━━━━━━━━━━━━━━━━
+
+Présenter l’ancienne architecture :
+
+ResNet50 gelé
+→ GlobalAveragePooling
+→ Dense(256)
+→ Dropout(0.5)
+→ Dense(2, softmax)
+
+Pipeline :
+- Dataset fusionné en Normal/Défectueux
+- Rééquilibrage 2:1
+- Resize 224×224
+- Grad-CAM pour localisation
+
+Hyperparamètres :
+- Adam lr=1e-4
+- EarlyStopping
+- ReduceLROnPlateau
+- ModelCheckpoint
+
+━━━━━━━━━━━━━━━━━━━
+⚠️ PROBLÈMES RENCONTRÉS
+━━━━━━━━━━━━━━━━━━━
+
+Créer une slide “Challenges”.
+
+Présenter :
+- accuracy bloquée à 50%
+- val_accuracy instable
+- images trop lourdes
+- problème BatchNorm
+- gradients bloqués
+- non-convergence
+- learning rate trop élevé
+- dataset déséquilibré
+
+Ajouter :
+- courbes accuracy/loss
+- graphiques instables
+- diagrammes avant/après
+
+━━━━━━━━━━━━━━━━━━━
+✅ SOLUTIONS APPLIQUÉES
+━━━━━━━━━━━━━━━━━━━
+
+Présenter les corrections :
+- suppression BatchNorm
+- réduction learning rate
+- resize avant entraînement
+- équilibrage dataset
+- optimisation pipeline
+
+Créer un slide comparatif :
+Before vs After
+
+━━━━━━━━━━━━━━━━━━━
+📌 SOLUTION FINALE PROPOSÉE
+━━━━━━━━━━━━━━━━━━━
+
+Basée sur l’article scientifique :
+
+“Deep Industrial Image Anomaly Detection: A Survey”
+
+Présenter :
+- pourquoi cette approche a été choisie
+- comparaison avec les autres méthodes
+
+━━━━━━━━━━━━━━━━━━━
+📌 ARCHITECTURE FINALE
+━━━━━━━━━━━━━━━━━━━
+
+Créer un schéma professionnel de l’architecture.
+
+Architecture :
+
+class resnet_feature_extractor(torch.nn.Module):
+- Extraction layer2
+- Extraction layer3
+- Average Pooling 3×3
+- Concaténation des features
+- Flatten
+- Memory Bank
+
+Dimensions :
+- layer2 = 512
+- layer3 = 1024
+- concat = 1536
+
+Méthode :
+- ResNet50 pretrained ImageNet
+- Memory Bank classique
+- Réduction à 10% des patches
+- Distance euclidienne minimale
+- Seuil = moyenne + 2×écart-type
+
+Créer un pipeline visuel moderne :
+
+Input Image
+→ Feature Extraction
+→ Memory Bank
+→ Distance Computation
+→ Threshold
+→ Anomaly Detection
+
+━━━━━━━━━━━━━━━━━━━
+📌 ÉVALUATION
+━━━━━━━━━━━━━━━━━━━
+
+Créer des slides modernes avec :
+
+Métriques :
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- ROC-AUC
+
+Ajouter :
+- matrices de confusion
+- courbes ROC
+- tableaux performances
+- graphiques comparatifs
+
+Comparer :
+- PatchCore
+- ancienne approche CNN
+- solution finale
+
+━━━━━━━━━━━━━━━━━━━
+📌 OUTPUTS VISUELS
+━━━━━━━━━━━━━━━━━━━
+
+Créer plusieurs slides avec :
+- images normales
+- images défectueuses
+- heatmaps
+- cartes d’anomalies
+- scores de confiance
+- localisation des défauts
+
+Mettre les outputs en grand format.
+
+━━━━━━━━━━━━━━━━━━━
+📌 DÉMONSTRATION
+━━━━━━━━━━━━━━━━━━━
+
+Créer une slide démonstration avec :
+- interface Gradio
+- upload image
+- prédiction
+- heatmap
+- score anomalie
+
+Ajouter captures d’écran réalistes.
+
+━━━━━━━━━━━━━━━━━━━
+📌 CONCLUSION
+━━━━━━━━━━━━━━━━━━━
+
+Créer une slide conclusion moderne.
+
+Résumer :
+- problématique
+- limites PatchCore
+- optimisation du pipeline
+- solution finale
+- performances obtenues
+
+━━━━━━━━━━━━━━━━━━━
+📌 PERSPECTIVES
+━━━━━━━━━━━━━━━━━━━
+
+Présenter :
+- temps réel
+- Edge AI
+- optimisation GPU
+- nouveaux datasets
+- segmentation avancée
+- déploiement industriel
+
+━━━━━━━━━━━━━━━━━━━
+📌 SLIDE FINALE
+━━━━━━━━━━━━━━━━━━━
+
+Créer une slide finale élégante :
+
+“Thank You”
+
+Ajouter :
+- fond industriel moderne
+- QR code GitHub
+- email
+- icônes IA
+
+━━━━━━━━━━━━━━━━━━━
+⚠️ IMPORTANT
+━━━━━━━━━━━━━━━━━━━
+
+La présentation doit :
+- ressembler à une vraie soutenance professionnelle IA
+- être très visuelle
+- éviter les longs paragraphes
+- mettre en avant :
+  • les problèmes rencontrés
+  • les limites
+  • les améliorations
+  • les performances
+  • les résultats finaux
+- utiliser des schémas modernes
+- utiliser un style cohérent sur toutes les slides
+- générer automatiquement :
+  • diagrammes
+  • pipelines
+  • tableaux
+  • graphiques
+  • illustrations
+  • layouts professionnels

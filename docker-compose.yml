@@ -10,6 +10,7 @@ volumes:
   minio-data:
   grafana-data:
   spark-jars:
+  flink-libs:
 
 services:
   minio:
@@ -106,10 +107,12 @@ services:
           memory: 256M
 
   flink-jobmanager:
-    image: flink:1.18-scala_2.12
+    build:
+      context: .
+      dockerfile: Dockerfile.flink
     container_name: flink-jobmanager
     ports:
-      - "8090:8081"
+     - "8090:8081"
     command: jobmanager
     environment:
       FLINK_PROPERTIES: |
@@ -121,21 +124,28 @@ services:
         s3.secret-key: minioadmin123
         s3.path.style.access: true
         execution.checkpointing.interval: 60000
-        taskmanager.memory.process.size: 512m
-        jobmanager.memory.process.size: 256m
+        taskmanager.memory.process.size: 1600m
+        jobmanager.memory.process.size: 1600m
     volumes:
       - flink-checkpoints:/opt/flink/checkpoints
+      - ./flink-libs:/opt/flink/lib/extra
+      - ./flink-jobs:/opt/flink/jobs
     networks:
       - taasim-net
     depends_on:
       - minio
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     deploy:
       resources:
         limits:
-          memory: 400M
+          memory: 1200M
 
   flink-taskmanager:
-    image: flink:1.18-scala_2.12
+    build:
+      context: .
+      dockerfile: Dockerfile.flink
     container_name: flink-taskmanager
     command: taskmanager
     environment:
@@ -147,16 +157,23 @@ services:
         s3.access-key: minioadmin
         s3.secret-key: minioadmin123
         s3.path.style.access: true
-        taskmanager.numberOfTaskSlots: 2
-        taskmanager.memory.process.size: 512m
+        taskmanager.numberOfTaskSlots: 3
+        taskmanager.memory.process.size: 1600m
+    volumes:
+      - flink-checkpoints:/opt/flink/checkpoints
+      - ./flink-libs:/opt/flink/lib/extra
+      - ./flink-jobs:/opt/flink/jobs
     networks:
       - taasim-net
     depends_on:
       - flink-jobmanager
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     deploy:
       resources:
         limits:
-          memory: 600M
+          memory: 1200M
 
   spark-jars-init:
     image: curlimages/curl:latest
@@ -174,7 +191,6 @@ services:
     volumes:
       - spark-jars:/jars
 
-  # ✅ CORRECTION : build custom Dockerfile.spark (Python 3.11)
   spark-master:
     build:
       context: .
@@ -203,7 +219,6 @@ services:
         limits:
           memory: 512M
 
-  # ✅ CORRECTION : build custom Dockerfile.spark (Python 3.11)
   spark-worker:
     build:
       context: .
@@ -308,7 +323,7 @@ services:
         limits:
           memory: 256M
 
-  # ✅ Jupyter reste sur son image originale (Python 3.11 natif)
+  # ✅ FIX : copie les JARs S3 dans le classpath Spark de l'image Jupyter au démarrage
   jupyter:
     image: jupyter/pyspark-notebook:spark-3.5.0
     container_name: jupyter
@@ -320,19 +335,30 @@ services:
       JUPYTER_TOKEN: "taasim"
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin123
-      PYSPARK_PYTHON: /usr/bin/python3
-      PYSPARK_DRIVER_PYTHON: /usr/bin/python3
+      PYSPARK_PYTHON: /opt/conda/bin/python
+      PYSPARK_DRIVER_PYTHON: /opt/conda/bin/python
       SPARK_MASTER: spark://spark-master:7077
     volumes:
       - ./notebooks:/home/jovyan/work
       - spark-jars:/home/jovyan/extra-jars
+    command: >
+      bash -c "
+        echo 'Copie des JARs S3 dans le classpath Spark...' &&
+        cp /home/jovyan/extra-jars/hadoop-aws-3.3.4.jar /usr/local/spark/jars/ &&
+        cp /home/jovyan/extra-jars/aws-java-sdk-bundle-1.12.262.jar /usr/local/spark/jars/ &&
+        echo 'Verification Python...' &&
+        /opt/conda/bin/python --version &&
+        echo 'JARs copies avec succes.' &&
+        start-notebook.sh --NotebookApp.token='taasim'
+      "
     networks:
       - taasim-net
     depends_on:
       - spark-master
       - minio
+      - spark-jars-init
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 4G
     restart: unless-stopped

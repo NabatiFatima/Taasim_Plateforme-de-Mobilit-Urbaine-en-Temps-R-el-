@@ -1,0 +1,28 @@
+FROM flink:1.17.2
+
+# Use a valid Cassandra connector version
+ADD https://repo1.maven.org/maven2/org/apache/flink/flink-connector-cassandra_2.12/3.0.0-1.16/flink-connector-cassandra_2.12-3.0.0-1.16.jar /opt/flink/lib/
+
+# Cassandra driver
+ADD https://repo1.maven.org/maven2/com/datastax/oss/java-driver-core/4.15.0/java-driver-core-4.15.0.jar /opt/flink/lib/
+ADD https://repo1.maven.org/maven2/com/datastax/oss/native-protocol/1.5.1/native-protocol-1.5.1.jar /opt/flink/lib/
+
+# ✅ Add S3 plugin (ONLY ONCE)
+RUN mkdir -p /opt/flink/plugins/s3-fs-hadoop && \
+    cp /opt/flink/opt/flink-s3-fs-hadoop-1.17.2.jar /opt/flink/plugins/s3-fs-hadoop/
+
+# 1. Install Python
+RUN apt-get update -y && \
+    apt-get install -y python3 python3-pip python3-dev wget && \
+    rm -rf /var/lib/apt/lists/*
+
+# 2. Link python
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# 3. Install Python libraries
+# We add shapely here for your GeoJSON processing
+RUN pip3 install --no-cache-dir --default-timeout=1000 apache-flink==1.17.2 shapely apache-beam
+
+# 4. Kafka connector
+RUN wget -q -P /opt/flink/lib/ \
+https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-kafka/1.17.2/flink-sql-connector-kafka-1.17.2.jar

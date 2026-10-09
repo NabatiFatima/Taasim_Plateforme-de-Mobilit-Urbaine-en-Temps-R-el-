@@ -4,20 +4,44 @@ USER root
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SPARK_VERSION=3.5.0
+ENV HADOOP_VERSION=3
 ENV SPARK_HOME=/opt/spark
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin:$JAVA_HOME/bin
 ENV PYSPARK_PYTHON=/usr/bin/python3.11
 ENV PYSPARK_DRIVER_PYTHON=/usr/bin/python3.11
 
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk python3.11 python3.11-dev python3-pip curl wget procps && \
+# Nettoyage du cache apt + --fix-missing pour éviter l'erreur de taille incohérente
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get update -o Acquire::Max-FutureTime=86400 --fix-missing && \
+    apt-get install -y --no-install-recommends \
+        openjdk-11-jdk \
+        python3.11 \
+        python3.11-dev \
+        python3-pip \
+        curl \
+        wget \
+        procps && \
     update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
     python3 -m pip install --upgrade pip && \
-    python3 -m pip install pyspark==3.5.0 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz && \
-    tar -xzf spark-${SPARK_VERSION}-bin-hadoop3.tgz -C /opt && \
-    mv /opt/spark-${SPARK_VERSION}-bin-hadoop3 $SPARK_HOME && \
-    rm spark-${SPARK_VERSION}-bin-hadoop3.tgz
+# Télécharger Spark (pas besoin de pip install pyspark)
+RUN wget -q https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz -C /opt && \
+    mv /opt/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} $SPARK_HOME && \
+    rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz
+
+# Télécharger et intégrer les JARs S3 (indispensables pour MinIO)
+RUN wget -q -P /tmp https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    wget -q -P /tmp https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar && \
+    cp /tmp/hadoop-aws-3.3.4.jar $SPARK_HOME/jars/ && \
+    cp /tmp/aws-java-sdk-bundle-1.12.262.jar $SPARK_HOME/jars/ && \
+    rm /tmp/*.jar
+
+# Bibliothèques Python utiles (optionnel, mais recommandé)
+RUN python3 -m pip install numpy pandas matplotlib seaborn folium boto3 utm
+
+WORKDIR /home
